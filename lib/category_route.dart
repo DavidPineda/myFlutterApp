@@ -1,21 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:my_app_flutter/category.dart';
+import 'category_item.dart';
+import 'unit.dart';
 
 final _backgroundColor = Colors.green[100];
 
-class CategoryItem {
-  String name;
-  Color color;
-
-  CategoryItem(this.name, this.color);
-}
-
 class CategoryRoute extends StatelessWidget {
-
-  CategoryRoute();
-
   List<CategoryItem> _categories = new List();
 
+  CategoryRoute();
 
   Widget _buildCategoryWidgets(List<Widget> categories) {
     return ListView.builder(
@@ -24,7 +17,17 @@ class CategoryRoute extends StatelessWidget {
     );
   }
 
-  void fillList() {
+  List<Unit> _retreiveUnitList(String categoryName) {
+    return List.generate(10, (int i) {
+      i += 1;
+      return Unit(
+        name: '$categoryName Unit $i',
+        conversion: i.toDouble(),
+      );
+    });
+  }
+
+  void _retreiveCategoryItems() {
     this._categories.add(new CategoryItem('Length', Colors.teal));
     this._categories.add(new CategoryItem('Area', Colors.orange));
     this._categories.add(new CategoryItem('Volume', Colors.pinkAccent));
@@ -37,7 +40,7 @@ class CategoryRoute extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    this.fillList();
+    this._retreiveCategoryItems();
     final categories = <Category>[];
 
     for (var i = 0; i < _categories.length; i++) {
@@ -45,6 +48,7 @@ class CategoryRoute extends StatelessWidget {
         name: _categories[i].name,
         color: _categories[i].color,
         iconLocation: Icons.cake,
+        units: _retreiveUnitList(_categories[i].name),
       ));
     }
 
