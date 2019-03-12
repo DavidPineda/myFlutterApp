@@ -1,6 +1,5 @@
-import 'pack'age:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'category_route.dart';
-
 
 void main() => runApp(MyApp());
 
