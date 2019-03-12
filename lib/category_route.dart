@@ -1,19 +1,60 @@
 import 'package:flutter/material.dart';
-import 'package:my_app_flutter/category.dart';
-import 'category_item.dart';
+
+import 'backdrop.dart';
+import 'category.dart';
+import 'category_tile.dart';
 import 'unit.dart';
+import 'unit_converter.dart';
+import 'category_item.dart';
 
-final _backgroundColor = Colors.green[100];
-
-class CategoryRoute extends StatelessWidget {
-  List<CategoryItem> _categories = new List();
-
+class CategoryRoute extends StatefulWidget {
   CategoryRoute();
 
-  Widget _buildCategoryWidgets(List<Widget> categories) {
+  @override
+  _CategoryRouteState createState() => _CategoryRouteState();
+}
+
+class _CategoryRouteState extends State<CategoryRoute> {
+  Category _defaultCategory;
+  Category _currentCategory;
+  final _categories = <Category>[];
+  List<CategoryItem> categoriesItems = new List();
+
+  @override
+  void initState() {
+    super.initState();
+    this._retreiveCategoryItems();
+
+    for (var i = 0; i < categoriesItems.length; i++) {
+      var category = Category(
+        name: categoriesItems[i].name,
+        color: categoriesItems[i].color,
+        iconLocation: Icons.cake,
+        units: _retreiveUnitList(categoriesItems[i].name),
+      );
+      if (i == 0) {
+        _defaultCategory = category;
+      }
+      _categories.add(category);
+    }
+  }
+
+  /// Function to call when a [Category] is tapped.
+  void _onCategoryTap(Category category) {
+    setState(() {
+      _currentCategory = category;
+    });
+  }
+
+  Widget _buildCategoryWidgets() {
     return ListView.builder(
-      itemBuilder: (BuildContext context, int index) => categories[index],
-      itemCount: categories.length,
+      itemBuilder: (BuildContext context, int index) {
+        return CategoryTile(
+          category: _categories[index],
+          onTap: _onCategoryTap,
+        );
+      },
+      itemCount: _categories.length,
     );
   }
 
@@ -28,52 +69,85 @@ class CategoryRoute extends StatelessWidget {
   }
 
   void _retreiveCategoryItems() {
-    this._categories.add(new CategoryItem('Length', Colors.teal));
-    this._categories.add(new CategoryItem('Area', Colors.orange));
-    this._categories.add(new CategoryItem('Volume', Colors.pinkAccent));
-    this._categories.add(new CategoryItem('Mass', Colors.blueAccent));
-    this._categories.add(new CategoryItem('Time', Colors.yellow));
-    this._categories.add(new CategoryItem('Digital Storage', Colors.greenAccent));
-    this._categories.add(new CategoryItem('Energy', Colors.purpleAccent));
-    this._categories.add(new CategoryItem('Currency', Colors.red));
+    this.categoriesItems.add(new CategoryItem(
+      'Length',
+      ColorSwatch(0xFF6AB7A8, {
+        'highlight': Color(0xFF6AB7A8),
+        'splash': Color(0xFF0ABC9B),
+      }),
+    ));
+    this.categoriesItems.add(new CategoryItem(
+      'Area',
+      ColorSwatch(0xFFFFD28E, {
+        'highlight': Color(0xFFFFD28E),
+        'splash': Color(0xFFFFA41C),
+      }),
+    ));
+    this.categoriesItems.add(new CategoryItem(
+      'Volume',
+      ColorSwatch(0xFFFFB7DE, {
+        'highlight': Color(0xFFFFB7DE),
+        'splash': Color(0xFFF94CBF),
+      }),
+    ));
+    this.categoriesItems.add(new CategoryItem(
+      'Mass',
+      ColorSwatch(0xFF8899A8, {
+        'highlight': Color(0xFF8899A8),
+        'splash': Color(0xFFA9CAE8),
+      }),
+    ));
+    this.categoriesItems.add(new CategoryItem(
+      'Time',
+      ColorSwatch(0xFFEAD37E, {
+        'highlight': Color(0xFFEAD37E),
+        'splash': Color(0xFFFFE070),
+      }),
+    ));
+    this.categoriesItems.add(new CategoryItem(
+      'Digital Storage',
+      ColorSwatch(0xFF81A56F, {
+        'highlight': Color(0xFF81A56F),
+        'splash': Color(0xFF7CC159),
+      }),
+    ));
+    this.categoriesItems.add(new CategoryItem(
+      'Energy',
+      ColorSwatch(0xFFD7C0E2, {
+        'highlight': Color(0xFFD7C0E2),
+        'splash': Color(0xFFCA90E5),
+      }),
+    ));
+    this.categoriesItems.add(new CategoryItem(
+      'Currency',
+      ColorSwatch(0xFFCE9A9A, {
+        'highlight': Color(0xFFCE9A9A),
+        'splash': Color(0xFFF94D56),
+        'error': Color(0xFF912D2D),
+      }),
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
-    this._retreiveCategoryItems();
-    final categories = <Category>[];
-
-    for (var i = 0; i < _categories.length; i++) {
-      categories.add(Category(
-        name: _categories[i].name,
-        color: _categories[i].color,
-        iconLocation: Icons.cake,
-        units: _retreiveUnitList(_categories[i].name),
-      ));
-    }
-
-    final listView = Container(
-      color: _backgroundColor,
-      padding: EdgeInsets.symmetric(horizontal: 8.0),
-      child: _buildCategoryWidgets(categories),
-    );
-
-    final appBar = AppBar(
-      elevation: 0.0,
-      title: Text(
-        'Unit Converter',
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 30.0,
-        ),
+    final listView = Padding(
+      padding: EdgeInsets.only(
+        left: 8.0,
+        right: 8.0,
+        bottom: 48.0,
       ),
-      centerTitle: true,
-      backgroundColor: _backgroundColor,
+      child: _buildCategoryWidgets(),
     );
 
-    return Scaffold(
-      appBar: appBar,
-      body: listView,
+    return Backdrop(
+      currentCategory:
+      _currentCategory == null ? _defaultCategory : _currentCategory,
+      frontPanel: _currentCategory == null
+          ? UnitConverter(category: _defaultCategory)
+          : UnitConverter(category: _currentCategory),
+      backPanel: listView,
+      frontTitle: Text('Unit Converter'),
+      backTitle: Text('Select a Category'),
     );
   }
 }
