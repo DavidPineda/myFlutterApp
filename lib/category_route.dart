@@ -8,6 +8,7 @@ import 'category_tile.dart';
 import 'unit.dart';
 import 'unit_converter.dart';
 import 'category_item.dart';
+import 'api.dart';
 
 class CategoryRoute extends StatefulWidget {
   CategoryRoute();
@@ -35,6 +36,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
     // assets/data/regular_units.json
     if (_categories.isEmpty) {
       await _retrieveLocalCategories();
+      await _retrieveApiCategory();
     }
   }
 
@@ -58,7 +60,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
         name: key,
         units: units,
         color: categoriesItems[categoryIndex].color,
-        iconLocation: Icons.cake,
+        iconLocation: categoriesItems[categoryIndex].iconLocation,
       );
       setState(() {
         if (categoryIndex == 0) {
@@ -68,6 +70,38 @@ class _CategoryRouteState extends State<CategoryRoute> {
       });
       categoryIndex += 1;
     });
+  }
+
+  /// Retrieves a [Category] and its [Unit]s from an API on the web
+  Future<void> _retrieveApiCategory() async {
+    // Add a placeholder while we fetch the Currency category using the API
+    setState(() {
+      _categories.add(Category(
+        name: apiCategory['name'],
+        units: [],
+        color: categoriesItems.last.color,
+        iconLocation: categoriesItems.last.iconLocation,
+      ));
+    });
+    final api = Api();
+    final jsonUnits = await api.getUnits(apiCategory['route']);
+    // If the API errors out or we have no internet connection, this category
+    // remains in placeholder mode (disabled)
+    if (jsonUnits != null) {
+      final units = <Unit>[];
+      for (var unit in jsonUnits) {
+        units.add(Unit.fromJson(unit));
+      }
+      setState(() {
+        _categories.removeLast();
+        _categories.add(Category(
+          name: apiCategory['name'],
+          units: units,
+          color: categoriesItems.last.color,
+          iconLocation: categoriesItems.last.iconLocation,
+        ));
+      });
+    }
   }
 
   /// Function to call when a [Category] is tapped.
@@ -109,6 +143,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
         'highlight': Color(0xFF6AB7A8),
         'splash': Color(0xFF0ABC9B),
       }),
+      'assets/icons/length.png',
     ));
     this.categoriesItems.add(new CategoryItem(
       'Area',
@@ -116,6 +151,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
         'highlight': Color(0xFFFFD28E),
         'splash': Color(0xFFFFA41C),
       }),
+      'assets/icons/area.png',
     ));
     this.categoriesItems.add(new CategoryItem(
       'Volume',
@@ -123,6 +159,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
         'highlight': Color(0xFFFFB7DE),
         'splash': Color(0xFFF94CBF),
       }),
+      'assets/icons/volume.png',
     ));
     this.categoriesItems.add(new CategoryItem(
       'Mass',
@@ -130,6 +167,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
         'highlight': Color(0xFF8899A8),
         'splash': Color(0xFFA9CAE8),
       }),
+      'assets/icons/mass.png',
     ));
     this.categoriesItems.add(new CategoryItem(
       'Time',
@@ -137,6 +175,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
         'highlight': Color(0xFFEAD37E),
         'splash': Color(0xFFFFE070),
       }),
+      'assets/icons/time.png',
     ));
     this.categoriesItems.add(new CategoryItem(
       'Digital Storage',
@@ -144,6 +183,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
         'highlight': Color(0xFF81A56F),
         'splash': Color(0xFF7CC159),
       }),
+      'assets/icons/digital_storage.png',
     ));
     this.categoriesItems.add(new CategoryItem(
       'Energy',
@@ -151,6 +191,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
         'highlight': Color(0xFFD7C0E2),
         'splash': Color(0xFFCA90E5),
       }),
+      'assets/icons/power.png',
     ));
     this.categoriesItems.add(new CategoryItem(
       'Currency',
@@ -159,6 +200,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
         'splash': Color(0xFFF94D56),
         'error': Color(0xFF912D2D),
       }),
+      'assets/icons/currency.png',
     ));
   }
 

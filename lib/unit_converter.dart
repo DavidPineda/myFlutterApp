@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'unit.dart';
 import 'category.dart';
+import 'api.dart';
 
 const _padding = EdgeInsets.all(16.0);
 
@@ -79,7 +81,7 @@ class _UnitConverterState extends State<UnitConverter> {
 
   /// Clean up conversion; trim trailing zeros, e.g. 5.500 -> 5.5, 10.0 -> 10
   String _format(double conversion) {
-    var outputNum = conversion.toStringAsPrecision(7);
+    var outputNum = conversion.toStringAsPrecision(10);
     if (outputNum.contains('.') && outputNum.endsWith('0')) {
       var i = outputNum.length - 1;
       while (outputNum[i] == '0') {
@@ -93,11 +95,22 @@ class _UnitConverterState extends State<UnitConverter> {
     return outputNum;
   }
 
-  void _updateConversion() {
-    setState(() {
-      _convertedValue =
-          _format(_inputValue * (_toValue.conversion / _fromValue.conversion));
-    });
+  Future _updateConversion() async {
+    if (widget.category.name == apiCategory['name']) {
+      final api = Api();
+      final conversion = await api.convert(apiCategory['route'],
+          _inputValue.toString(), _fromValue.name, _toValue.name);
+
+      setState(() {
+        _convertedValue = _format(conversion);
+      });
+    } else {
+      // For the static units, we do the conversion ourselves
+      setState(() {
+        _convertedValue = _format(
+            _inputValue * (_toValue.conversion / _fromValue.conversion));
+      });
+    }
   }
 
   void _updateInputValue(String input) {
